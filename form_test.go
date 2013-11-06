@@ -56,8 +56,8 @@ func TestMultipartForm(t *testing.T) {
 	defer ts.Close()
 
 	f := Form{}
-	f.Fields().Add("Name", "John")
-	f.Files().Add("File", "test-files/logo.png")
+	f.Field().Add("Name", "John")
+	f.File().Add("File", "test-files/logo.png")
 
 	req, err := f.Request("POST", ts.URL)
 	if err != nil {
@@ -80,8 +80,8 @@ func testForm(verb string, t *testing.T) {
 	defer ts.Close()
 
 	f := Form{}
-	f.Fields().Add("Name", "John")
-	f.Fields().Add("Likes", "Ice Cream")
+	f.Field().Add("Name", "John")
+	f.Field().Add("Likes", "Ice Cream")
 
 	req, err := f.Request(verb, ts.URL)
 	if err != nil {

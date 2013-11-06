@@ -17,6 +17,7 @@ type Form struct {
 	files  url.Values
 }
 
+// Creates new Form with given fields and files
 func NewForm(fields, files url.Values) (f *Form) {
 	if fields != nil {
 		f.fields = fields
@@ -27,20 +28,24 @@ func NewForm(fields, files url.Values) (f *Form) {
 	return
 }
 
-func (f *Form) Fields() url.Values {
+// Returns url.Values which should be used to Add form field
+func (f *Form) Field() url.Values {
 	if f.fields == nil {
 		f.fields = make(url.Values)
 	}
 	return f.fields
 }
 
-func (f *Form) Files() url.Values {
+// Returns url.Values which should be used to Add form file
+func (f *Form) File() url.Values {
 	if f.files == nil {
 		f.files = make(url.Values)
 	}
 	return f.files
 }
 
+// Returns request based on current Fields and Files assoicated with form
+// Request will always have correct Content-Type set
 func (form *Form) Request(verb, urlStr string) (*http.Request, error) {
 	if verb == "GET" {
 		return nil, fmt.Errorf("Can't create GET form [TODO]: %s", urlStr)

@@ -10,9 +10,10 @@ type Json struct {
 	payload interface{}
 }
 
-func NewJson(payload interface{}) (j *Json) {
+func NewJson(payload interface{}) *Json {
+	j := &Json{}
 	j.payload = payload
-	return
+	return j
 }
 
 func (j *Json) Set(payload interface{}) *Json {
@@ -20,6 +21,8 @@ func (j *Json) Set(payload interface{}) *Json {
 	return j
 }
 
+// Returns request based on current payload assoicated with Json request,
+// it will always have correct Content-Type set
 func (j *Json) Request(verb, urlStr string) (req *http.Request, err error) {
 	var data []byte
 

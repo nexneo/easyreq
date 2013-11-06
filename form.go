@@ -63,6 +63,7 @@ func (form *Form) Request(verb, urlStr string) (*http.Request, error) {
 
 	for key, paths := range form.files {
 		for _, pathVal := range paths {
+			pathVal = filepath.Clean(pathVal)
 			file, err := os.Open(pathVal)
 			if err != nil {
 				return nil, err

@@ -2,16 +2,19 @@
 // multipart form request or json API requests.
 //
 // Form Example
-// 		f := Form{}
+// 		f := easyreq.Form{}
 // 		f.Field().Add("Name", "John")
 // 		f.File().Add("File", "test-files/logo.png")
 //
 // 		req, err := f.Request("POST", "http://example.com/postform")
+// or
+//		f := easyreq.NewFrom(fields, files)
 //
-// 		// It will choose Content-Type based on any file added or not.
+// From will choose Content-Type based on any file added or not.
 //
 // Json Example
-// 		req, err := (&Json{}).Set(v).Request("POST", "http://example.com/postjson")
+//		j := easyreq.Json{}
+// 		req, err := j.Set(v).Request("POST", "http://example.com/postjson")
 // or
 // 		req, err := NewJson(v).Request("PUT", "http://example.com/putjson")
 package easyreq

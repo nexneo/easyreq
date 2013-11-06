@@ -19,7 +19,8 @@ func TestJsonPost(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(handler))
 	defer ts.Close()
 
-	req, err := (&Json{}).Set(payload()).Request("POST", ts.URL)
+	j := Json{}
+	req, err := j.Set(payload()).Request("POST", ts.URL)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -39,7 +40,7 @@ func TestJsonPut(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(handler))
 	defer ts.Close()
 
-	req, err := NewJson(payload()).Request("POST", ts.URL)
+	req, err := NewJson(payload()).Request("PUT", ts.URL)
 	if err != nil {
 		t.Fatal(err)
 	}

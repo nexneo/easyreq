@@ -11,7 +11,7 @@
 // 		// It will choose Content-Type based on any file added or not.
 //
 // Json Example
-// 		req, err := (&Json{}).Set(v).Request("POST", ts.URL)
+// 		req, err := (&Json{}).Set(v).Request("POST", "http://example.com/postjson")
 // or
-// 		req, err := NewJson(v).Request("POST", ts.URL)
+// 		req, err := NewJson(v).Request("PUT", "http://example.com/putjson")
 package easyreq

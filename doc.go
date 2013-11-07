@@ -1,5 +1,8 @@
 // Package easyreq provides support for creating requests easily for
 // multipart form request or json API requests.
+
+// Usage
+// import "github.com/nexneo/easyreq"
 //
 // Form Example
 // 		f := easyreq.Form{}
@@ -16,5 +19,5 @@
 //		j := easyreq.Json{}
 // 		req, err := j.Set(v).Request("POST", "http://example.com/postjson")
 // or
-// 		req, err := NewJson(v).Request("PUT", "http://example.com/putjson")
+// 		req, err := easyreq.NewJson(v).Request("PUT", "http://example.com/putjson")
 package easyreq

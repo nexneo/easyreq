@@ -16,9 +16,9 @@ Form Example
  
  or
  
-		f := easyreq.NewFrom(fields, files)
+		f := easyreq.NewForm(fields, files)
 
- From will choose Content-Type based on any file added or not.
+ Form will choose Content-Type based on any file added or not.
 
 Json Example
 ------------

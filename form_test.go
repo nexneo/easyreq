@@ -14,7 +14,7 @@ func testReq(t *testing.T, w http.ResponseWriter, r *http.Request) {
 	t.Log(ctype)
 	m := make(url.Values)
 	if !strings.Contains(ctype, "json") {
-		if err := r.ParseForm(); err != nil {
+		if err := r.ParseMultipartForm(10 << 20); err != nil {
 			t.Fatal(err)
 		}
 		m = r.Form
@@ -25,7 +25,7 @@ func testReq(t *testing.T, w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if len(m["Name"]) > 0 && m["Name"][0] != "John" {
+	if m["Name"][0] != "John" {
 		t.Log(len(m["Name"]))
 		t.Fatal(m)
 	}

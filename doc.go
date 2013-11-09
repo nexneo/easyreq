@@ -5,18 +5,21 @@
 // import "github.com/nexneo/easyreq"
 //
 // Form Example
-// 		f := easyreq.Form{}
-// 		f.Field().Add("Name", "John")
-// 		f.File().Add("File", "test-files/logo.png")
+//		f := easyreq.Form{}
+//		f.Field().Add("Name", "John")
+//		f.File().Add("File", "test-files/logo.png")
+//		f.Header().Add("Host", "example.com")
 //
 // 		req, err := f.Request("POST", "http://example.com/postform")
 // or
-//		f := easyreq.NewForm(fields, files)
+//		f := easyreq.NewForm(fields, nil)
+//		easyreq.Do(f, "GET", "http://example.com/")
 //
 // Form will choose Content-Type based on any file added or not.
 //
 // Json Example
 //		j := easyreq.Json{}
+//		j.Header().Add("Host", "example.com")
 // 		req, err := j.Set(v).Request("POST", "http://example.com/postjson")
 // or
 // 		req, err := easyreq.NewJson(v).Request("PUT", "http://example.com/putjson")

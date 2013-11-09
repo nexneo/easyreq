@@ -8,6 +8,7 @@ import (
 
 type Json struct {
 	payload interface{}
+	header  http.Header
 }
 
 func NewJson(payload interface{}) *Json {
@@ -19,6 +20,13 @@ func NewJson(payload interface{}) *Json {
 func (j *Json) Set(payload interface{}) *Json {
 	j.payload = payload
 	return j
+}
+
+func (j *Json) Header() http.Header {
+	if j.header == nil {
+		j.header = make(http.Header)
+	}
+	return j.header
 }
 
 // Returns request based on current payload assoicated with Json request,
@@ -39,6 +47,7 @@ func (j *Json) Request(verb, urlStr string) (req *http.Request, err error) {
 		return
 	}
 
+	req.Header = j.Header()
 	req.Header.Set("Content-Type", "application/json")
 	return
 }

@@ -20,6 +20,7 @@ func TestJsonPost(t *testing.T) {
 	defer ts.Close()
 
 	j := Json{}
+	j.Header().Add("Host", "example.com")
 	req, err := j.Set(payload()).Request("POST", ts.URL)
 	if err != nil {
 		t.Fatal(err)
@@ -31,6 +32,14 @@ func TestJsonPost(t *testing.T) {
 	}
 
 	if _, err := http.DefaultClient.Do(req); err != nil {
+		t.Fatal(err)
+	}
+
+	if req.Header.Get("Host") != "example.com" {
+		t.Fail()
+	}
+
+	if _, err := Do(&j, "POST", ts.URL); err != nil {
 		t.Fatal(err)
 	}
 }

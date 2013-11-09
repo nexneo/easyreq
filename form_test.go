@@ -72,6 +72,10 @@ func TestMultipartForm(t *testing.T) {
 	if contentType == "application/x-www-form-urlencoded" {
 		t.Fail()
 	}
+
+	if _, err := Do(&f, "POST", ts.URL); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func testForm(verb string, t *testing.T) {
@@ -79,9 +83,10 @@ func testForm(verb string, t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(handler))
 	defer ts.Close()
 
-	f := Form{}
+	f := NewForm(nil, nil)
 	f.Field().Add("Name", "John")
 	f.Field().Add("Likes", "Ice Cream")
+	f.Header().Add("Host", "example.com")
 
 	req, err := f.Request(verb, ts.URL)
 	if err != nil {
@@ -94,6 +99,10 @@ func testForm(verb string, t *testing.T) {
 
 	contentType := req.Header.Get("Content-Type")
 	if contentType != "application/x-www-form-urlencoded" {
+		t.Fail()
+	}
+
+	if req.Header.Get("Host") != "example.com" {
 		t.Fail()
 	}
 }

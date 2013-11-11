@@ -59,17 +59,25 @@ func (f *Form) Header() http.Header {
 	return f.header
 }
 
-func SetBasicAuth(r Requester, username, password string) {
+func setBasicAuth(r Requester, username, password string) {
 	s := username + ":" + password
 	r.Header().Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(s)))
 }
 
-func Do(r Requester, verb, urlStr string) (*http.Response, error) {
+func (f *Form) SetBasicAuth(username, password string) {
+	setBasicAuth(f, username, password)
+}
+
+func do(r Requester, verb, urlStr string) (*http.Response, error) {
 	req, err := r.Request(verb, urlStr)
 	if err != nil {
 		return nil, err
 	}
 	return http.DefaultClient.Do(req)
+}
+
+func (f *Form) Do(verb, urlStr string) (*http.Response, error) {
+	return do(f, verb, urlStr)
 }
 
 // Returns request based on current Fields and Files assoicated with form
@@ -106,7 +114,10 @@ func (form *Form) Request(verb, urlStr string) (*http.Request, error) {
 			if _, err = io.Copy(mimePart, file); err != nil {
 				return nil, err
 			}
-			file.Close()
+
+			if err = file.Close(); err != nil {
+				return nil, err
+			}
 		}
 	}
 

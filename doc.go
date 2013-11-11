@@ -12,8 +12,8 @@
 //
 // 		req, err := f.Request("POST", "http://example.com/postform")
 // or
-//		f := easyreq.NewForm(fields, nil)
-//		easyreq.Do(f, "GET", "http://example.com/")
+//		easyreq.NewForm(fields, nil).Do("GET", "http://example.com/")
+//		easyreq.NewForm(fields, files).Do("POST", "http://example.com/")
 //
 // Form will choose Content-Type based on any file added or not.
 //

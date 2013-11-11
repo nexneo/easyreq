@@ -74,7 +74,7 @@ func TestMultipartForm(t *testing.T) {
 		t.Fail()
 	}
 
-	if _, err := Do(&f, "POST", ts.URL); err != nil {
+	if _, err := f.Do("POST", ts.URL); err != nil {
 		t.Fatal(err)
 	}
 }

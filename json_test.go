@@ -39,7 +39,7 @@ func TestJsonPost(t *testing.T) {
 		t.Fail()
 	}
 
-	if _, err := Do(&j, "POST", ts.URL); err != nil {
+	if _, err := j.Do("POST", ts.URL); err != nil {
 		t.Fatal(err)
 	}
 }

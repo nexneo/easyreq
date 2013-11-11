@@ -29,6 +29,14 @@ func (j *Json) Header() http.Header {
 	return j.header
 }
 
+func (j *Json) Do(verb, urlStr string) (*http.Response, error) {
+	return do(j, verb, urlStr)
+}
+
+func (j *Json) SetBasicAuth(username, password string) {
+	setBasicAuth(j, username, password)
+}
+
 // Returns request based on current payload assoicated with Json request,
 // it will always have correct Content-Type set
 func (j *Json) Request(verb, urlStr string) (req *http.Request, err error) {

@@ -2,6 +2,7 @@ package easyreq
 
 import (
 	"bytes"
+	"encoding/base64"
 	"fmt"
 	"io"
 	"mime/multipart"
@@ -19,6 +20,7 @@ type Form struct {
 }
 
 type Requester interface {
+	Header() http.Header
 	Request(string, string) (*http.Request, error)
 }
 
@@ -55,6 +57,11 @@ func (f *Form) Header() http.Header {
 		f.header = make(http.Header)
 	}
 	return f.header
+}
+
+func SetBasicAuth(r Requester, username, password string) {
+	s := username + ":" + password
+	r.Header().Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(s)))
 }
 
 func Do(r Requester, verb, urlStr string) (*http.Response, error) {

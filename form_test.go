@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"strings"
 	"testing"
 )
@@ -74,6 +75,17 @@ func TestMultipartForm(t *testing.T) {
 	}
 
 	if _, err := Do(&f, "POST", ts.URL); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestFailedCase(t *testing.T) {
+	f := Form{}
+	f.Field().Add("Name", "John")
+	f.File().Add("File", "test-files/logo1.png") //file doesn't exists
+
+	_, err := f.Request("POST", "http://local/")
+	if !os.IsNotExist(err) {
 		t.Fatal(err)
 	}
 }

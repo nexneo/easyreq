@@ -12,8 +12,13 @@ import (
 
 func testReq(t *testing.T, w http.ResponseWriter, r *http.Request) {
 	ctype := r.Header.Get("Content-Type")
-	t.Log(ctype)
 	m := make(url.Values)
+
+	if r.Method != "GET" && ctype == "" {
+		t.Log(ctype)
+		t.Fail()
+	}
+
 	if strings.Contains(ctype, "json") {
 		decoder := json.NewDecoder(r.Body)
 		if err := decoder.Decode(&m); err != nil {

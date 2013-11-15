@@ -21,20 +21,59 @@ func TestMultipartForm(t *testing.T) {
 
 	req, err := f.Request("POST", ts.URL+"/?test=true")
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 
 	if _, err := http.DefaultClient.Do(req); err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 
 	contentType := req.Header.Get("Content-Type")
 	if contentType == "application/x-www-form-urlencoded" {
-		t.Fail()
+		t.Error(contentType)
 	}
 
 	if _, err := f.Do("POST", ts.URL+"/?test=true"); err != nil {
-		t.Fatal(err)
+		t.Error(err)
+	}
+}
+
+func TestSimpleGet(t *testing.T) {
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Query().Get("Name") != "John" {
+			t.Error(r.URL)
+		}
+	}
+
+	ts := httptest.NewServer(http.HandlerFunc(handler))
+	defer ts.Close()
+
+	f := Form{}
+	f.Field().Add("Name", "John")
+
+	req, err := f.Request("GET", ts.URL)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if _, err := http.DefaultClient.Do(req); err != nil {
+		t.Error(err)
+	}
+
+}
+
+func TestSimplestGet(t *testing.T) {
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		if len(r.URL.Query()) > 0 {
+			t.Error(r.URL)
+		}
+	}
+
+	ts := httptest.NewServer(http.HandlerFunc(handler))
+	defer ts.Close()
+
+	if _, err := (&Form{}).Do("GET", ts.URL); err != nil {
+		t.Error(err)
 	}
 }
 
@@ -62,7 +101,7 @@ func testForm(verb string, t *testing.T) {
 
 	req, err := f.Request(verb, ts.URL+"/?test=true")
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 
 	if req.Method != verb {
@@ -75,7 +114,7 @@ func testForm(verb string, t *testing.T) {
 	}
 
 	if _, err := http.DefaultClient.Do(req); err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 }
 
@@ -84,19 +123,18 @@ func testReq(t *testing.T, w http.ResponseWriter, r *http.Request) {
 	m := make(url.Values)
 
 	if r.Method != "GET" && ctype == "" {
-		t.Log(ctype)
-		t.Fail()
+		t.Error(ctype)
 	}
 
 	if strings.Contains(ctype, "json") {
 		decoder := json.NewDecoder(r.Body)
 		if err := decoder.Decode(&m); err != nil {
-			t.Fatal(err)
+			t.Error(err)
 		}
 
 	} else if strings.Contains(ctype, "form") {
 		if err := r.ParseMultipartForm(10 << 20); err != nil {
-			t.Fatal(err)
+			t.Error(err)
 		}
 		m = r.Form
 	} else {
@@ -104,17 +142,17 @@ func testReq(t *testing.T, w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.URL.Query().Get("test") != "true" {
-		t.Fatal(r.URL.String())
+		t.Error(r.URL)
 	}
 
 	if len(m["Name"]) == 0 || m["Name"][0] != "John" {
-		t.Log(r.URL.String())
-		t.Fatal(m)
+		t.Log(r.URL)
+		t.Error(m)
 	}
 
 	if strings.Contains(ctype, "multipart") {
 		if _, _, err := r.FormFile("File"); err != nil {
-			t.Fatal(err)
+			t.Error(err)
 		}
 	}
 }
@@ -126,6 +164,6 @@ func TestFailedCase(t *testing.T) {
 
 	_, err := f.Request("POST", "http://local/")
 	if !os.IsNotExist(err) {
-		t.Fatal(err)
+		t.Error(err)
 	}
 }

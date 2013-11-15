@@ -156,13 +156,14 @@ func getRequest(form *Form, verb, urlStr string) (*http.Request, error) {
 		return nil, err
 	}
 
-	urlStr = u.Scheme +
-		"://" +
-		u.Host +
-		u.Path +
-		"?" +
-		u.Query().Encode() + "&" +
-		form.fields.Encode()
+	if len(form.fields) != 0 {
+		if len(u.Query()) != 0 {
+			urlStr += "&"
+		} else {
+			urlStr += "?"
+		}
+		urlStr += form.fields.Encode()
+	}
 
 	req, err := http.NewRequest(verb, urlStr, nil)
 	if err != nil {

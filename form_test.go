@@ -11,7 +11,7 @@ import (
 )
 
 func TestMultipartForm(t *testing.T) {
-	handler := func(w http.ResponseWriter, r *http.Request) { testReq(t, w, r) }
+	handler := func(w http.ResponseWriter, r *http.Request) { testData(t, w, r) }
 	ts := httptest.NewServer(http.HandlerFunc(handler))
 	defer ts.Close()
 
@@ -78,19 +78,42 @@ func TestSimplestGet(t *testing.T) {
 }
 
 func TestPostForm(t *testing.T) {
-	testForm("POST", t)
+	testForm("POST", t, func(r *http.Request) {
+		ctype := r.Header.Get("Content-Type")
+		if ctype != "application/x-www-form-urlencoded" {
+			t.Fatal(ctype)
+		}
+		if r.Method != "POST" {
+			t.Fatal(r.Method)
+		}
+	})
 }
 
 func TestPutForm(t *testing.T) {
-	testForm("PUT", t)
+	testForm("PUT", t, func(r *http.Request) {
+		ctype := r.Header.Get("Content-Type")
+		if ctype != "application/x-www-form-urlencoded" {
+			t.Fatal(ctype)
+		}
+		if r.Method != "PUT" {
+			t.Fatal(r.Method)
+		}
+	})
 }
 
 func TestGetForm(t *testing.T) {
-	testForm("GET", t)
+	testForm("GET", t, func(r *http.Request) {
+		if r.Method != "GET" {
+			t.Fatal(r.Method)
+		}
+	})
 }
 
-func testForm(verb string, t *testing.T) {
-	handler := func(w http.ResponseWriter, r *http.Request) { testReq(t, w, r) }
+func testForm(verb string, t *testing.T, fn func(*http.Request)) {
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		fn(r)
+		testData(t, w, r)
+	}
 	ts := httptest.NewServer(http.HandlerFunc(handler))
 	defer ts.Close()
 
@@ -118,20 +141,15 @@ func testForm(verb string, t *testing.T) {
 	}
 }
 
-func testReq(t *testing.T, w http.ResponseWriter, r *http.Request) {
+func testData(t *testing.T, w http.ResponseWriter, r *http.Request) {
 	ctype := r.Header.Get("Content-Type")
 	m := make(url.Values)
-
-	if r.Method != "GET" && ctype == "" {
-		t.Error(ctype)
-	}
 
 	if strings.Contains(ctype, "json") {
 		decoder := json.NewDecoder(r.Body)
 		if err := decoder.Decode(&m); err != nil {
 			t.Error(err)
 		}
-
 	} else if strings.Contains(ctype, "form") {
 		if err := r.ParseMultipartForm(10 << 20); err != nil {
 			t.Error(err)
@@ -151,8 +169,10 @@ func testReq(t *testing.T, w http.ResponseWriter, r *http.Request) {
 	}
 
 	if strings.Contains(ctype, "multipart") {
-		if _, _, err := r.FormFile("File"); err != nil {
+		if _, h, err := r.FormFile("File"); err != nil {
 			t.Error(err)
+		} else if h.Filename != "logo.png" {
+			t.Error(h.Filename)
 		}
 	}
 }

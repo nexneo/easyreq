@@ -15,7 +15,7 @@ func payload() interface{} {
 }
 
 func TestJsonPost(t *testing.T) {
-	handler := func(w http.ResponseWriter, r *http.Request) { testReq(t, w, r) }
+	handler := func(w http.ResponseWriter, r *http.Request) { testData(t, w, r) }
 	ts := httptest.NewServer(http.HandlerFunc(handler))
 	defer ts.Close()
 
@@ -45,7 +45,7 @@ func TestJsonPost(t *testing.T) {
 }
 
 func TestJsonPut(t *testing.T) {
-	handler := func(w http.ResponseWriter, r *http.Request) { testReq(t, w, r) }
+	handler := func(w http.ResponseWriter, r *http.Request) { testData(t, w, r) }
 	ts := httptest.NewServer(http.HandlerFunc(handler))
 	defer ts.Close()
 

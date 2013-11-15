@@ -29,6 +29,7 @@ func (j *Json) Header() http.Header {
 	return j.header
 }
 
+// Helper funcation send requests using http.DefaultClient
 func (j *Json) Do(verb, urlStr string) (*http.Response, error) {
 	return do(j, verb, urlStr)
 }

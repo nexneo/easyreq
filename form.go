@@ -58,13 +58,19 @@ func (f *Form) Header() http.Header {
 	return f.header
 }
 
+// Helper to set Basic Auth header for request
+func (f *Form) SetBasicAuth(username, password string) {
+	setBasicAuth(f, username, password)
+}
+
 func setBasicAuth(r Requester, username, password string) {
 	s := username + ":" + password
 	r.Header().Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(s)))
 }
 
-func (f *Form) SetBasicAuth(username, password string) {
-	setBasicAuth(f, username, password)
+// Helper funcation send requests using http.DefaultClient
+func (f *Form) Do(verb, urlStr string) (*http.Response, error) {
+	return do(f, verb, urlStr)
 }
 
 func do(r Requester, verb, urlStr string) (*http.Response, error) {
@@ -75,17 +81,15 @@ func do(r Requester, verb, urlStr string) (*http.Response, error) {
 	return http.DefaultClient.Do(req)
 }
 
-func (f *Form) Do(verb, urlStr string) (*http.Response, error) {
-	return do(f, verb, urlStr)
-}
-
 // Returns request based on current Fields and Files assoicated with form
-// Request will always have correct Content-Type set
+// Request will always have correct Content-Type set for POST and PUT
 func (form *Form) Request(verb, urlStr string) (*http.Request, error) {
+	// GET handled differently then POST, PUT
 	if verb == "GET" {
 		return getRequest(form, verb, urlStr)
 	}
 
+	// no files take shortcut
 	if len(form.files) == 0 {
 		return postWithoutFiles(form, verb, urlStr)
 	}
@@ -138,6 +142,7 @@ func (form *Form) Request(verb, urlStr string) (*http.Request, error) {
 	return req, nil
 }
 
+// send urlencoded fields in body
 func postWithoutFiles(form *Form, verb, urlStr string) (*http.Request, error) {
 	data := strings.NewReader(form.fields.Encode())
 	req, err := http.NewRequest(verb, urlStr, data)
@@ -150,16 +155,20 @@ func postWithoutFiles(form *Form, verb, urlStr string) (*http.Request, error) {
 	return req, nil
 }
 
+// send urlencoded fields in url
 func getRequest(form *Form, verb, urlStr string) (*http.Request, error) {
 	u, err := url.Parse(urlStr)
 	if err != nil {
 		return nil, err
 	}
 
+	// bother only if new fields are added
 	if len(form.fields) != 0 {
 		if len(u.Query()) != 0 {
+			// if original url had encoded fields join
 			urlStr += "&"
 		} else {
+			// else start
 			urlStr += "?"
 		}
 		urlStr += form.fields.Encode()

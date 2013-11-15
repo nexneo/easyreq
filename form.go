@@ -3,7 +3,6 @@ package easyreq
 import (
 	"bytes"
 	"encoding/base64"
-	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -84,15 +83,11 @@ func (f *Form) Do(verb, urlStr string) (*http.Response, error) {
 // Request will always have correct Content-Type set
 func (form *Form) Request(verb, urlStr string) (*http.Request, error) {
 	if verb == "GET" {
-		return nil, fmt.Errorf("Can't create GET form [TODO]: %s", urlStr)
+		return getRequest(form, verb, urlStr)
 	}
 
 	if len(form.files) == 0 {
-		data := strings.NewReader(form.fields.Encode())
-		req, _ := http.NewRequest(verb, urlStr, data)
-		req.Header = form.Header()
-		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-		return req, nil
+		return postWithoutFiles(form, verb, urlStr)
 	}
 
 	body := &bytes.Buffer{}
@@ -139,6 +134,41 @@ func (form *Form) Request(verb, urlStr string) (*http.Request, error) {
 	}
 	req.Header = form.Header()
 	req.Header.Set("Content-Type", bodyWriter.FormDataContentType())
+
+	return req, nil
+}
+
+func postWithoutFiles(form *Form, verb, urlStr string) (*http.Request, error) {
+	data := strings.NewReader(form.fields.Encode())
+	req, err := http.NewRequest(verb, urlStr, data)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = form.Header()
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	return req, nil
+}
+
+func getRequest(form *Form, verb, urlStr string) (*http.Request, error) {
+	u, err := url.Parse(urlStr)
+	if err != nil {
+		return nil, err
+	}
+
+	urlStr = u.Scheme +
+		"://" +
+		u.Host +
+		u.Path +
+		"?" +
+		u.Query().Encode() + "&" +
+		form.fields.Encode()
+
+	req, err := http.NewRequest(verb, urlStr, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = form.Header()
 
 	return req, nil
 }

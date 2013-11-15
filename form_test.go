@@ -14,20 +14,27 @@ func testReq(t *testing.T, w http.ResponseWriter, r *http.Request) {
 	ctype := r.Header.Get("Content-Type")
 	t.Log(ctype)
 	m := make(url.Values)
-	if !strings.Contains(ctype, "json") {
+	if strings.Contains(ctype, "json") {
+		decoder := json.NewDecoder(r.Body)
+		if err := decoder.Decode(&m); err != nil {
+			t.Fatal(err)
+		}
+
+	} else if strings.Contains(ctype, "form") {
 		if err := r.ParseMultipartForm(10 << 20); err != nil {
 			t.Fatal(err)
 		}
 		m = r.Form
 	} else {
-		decoder := json.NewDecoder(r.Body)
-		if err := decoder.Decode(&m); err != nil {
-			t.Fatal(err)
-		}
+		m = r.URL.Query()
 	}
 
-	if m["Name"][0] != "John" {
-		t.Log(len(m["Name"]))
+	if r.URL.Query().Get("test") != "true" {
+		t.Fatal(r.URL.String())
+	}
+
+	if len(m["Name"]) == 0 || m["Name"][0] != "John" {
+		t.Log(r.URL.String())
 		t.Fatal(m)
 	}
 
@@ -35,11 +42,6 @@ func testReq(t *testing.T, w http.ResponseWriter, r *http.Request) {
 		if _, _, err := r.FormFile("File"); err != nil {
 			t.Fatal(err)
 		}
-	}
-
-	if r.ContentLength < 20 {
-		t.Log(r.ContentLength)
-		t.Fail()
 	}
 }
 
@@ -60,7 +62,7 @@ func TestMultipartForm(t *testing.T) {
 	f.Field().Add("Name", "John")
 	f.File().Add("File", "test-files/logo.png")
 
-	req, err := f.Request("POST", ts.URL)
+	req, err := f.Request("POST", ts.URL+"/?test=true")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -74,7 +76,7 @@ func TestMultipartForm(t *testing.T) {
 		t.Fail()
 	}
 
-	if _, err := f.Do("POST", ts.URL); err != nil {
+	if _, err := f.Do("POST", ts.URL+"/?test=true"); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -90,6 +92,10 @@ func TestFailedCase(t *testing.T) {
 	}
 }
 
+func TestGetForm(t *testing.T) {
+	testForm("GET", t)
+}
+
 func testForm(verb string, t *testing.T) {
 	handler := func(w http.ResponseWriter, r *http.Request) { testReq(t, w, r) }
 	ts := httptest.NewServer(http.HandlerFunc(handler))
@@ -100,21 +106,21 @@ func testForm(verb string, t *testing.T) {
 	f.Field().Add("Likes", "Ice Cream")
 	f.Header().Add("Host", "example.com")
 
-	req, err := f.Request(verb, ts.URL)
+	req, err := f.Request(verb, ts.URL+"/?test=true")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if _, err := http.DefaultClient.Do(req); err != nil {
-		t.Fatal(err)
-	}
-
-	contentType := req.Header.Get("Content-Type")
-	if contentType != "application/x-www-form-urlencoded" {
+	if req.Method != verb {
+		t.Log(req.Method)
 		t.Fail()
 	}
 
 	if req.Header.Get("Host") != "example.com" {
 		t.Fail()
+	}
+
+	if _, err := http.DefaultClient.Do(req); err != nil {
+		t.Fatal(err)
 	}
 }

@@ -21,7 +21,7 @@ func TestJsonPost(t *testing.T) {
 
 	j := Json{}
 	j.Header().Add("Host", "example.com")
-	req, err := j.Set(payload()).Request("POST", ts.URL)
+	req, err := j.Set(payload()).Request("POST", ts.URL+"/?test=true")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -39,7 +39,7 @@ func TestJsonPost(t *testing.T) {
 		t.Fail()
 	}
 
-	if _, err := j.Do("POST", ts.URL); err != nil {
+	if _, err := j.Do("POST", ts.URL+"/?test=true"); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -49,7 +49,7 @@ func TestJsonPut(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(handler))
 	defer ts.Close()
 
-	req, err := NewJson(payload()).Request("PUT", ts.URL)
+	req, err := NewJson(payload()).Request("PUT", ts.URL+"/?test=true")
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -12,12 +12,15 @@ import (
 	"strings"
 )
 
+// Structure that contains form fields and upload files,
+// can optionally have request headers.
 type Form struct {
 	fields url.Values
 	files  url.Values
 	header http.Header
 }
 
+// Inteface implemeted by Form, Json structures
 type Requester interface {
 	Header() http.Header
 	Request(string, string) (*http.Request, error)

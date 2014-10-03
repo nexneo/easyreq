@@ -150,8 +150,13 @@ func testData(t *testing.T, w http.ResponseWriter, r *http.Request) {
 		if err := decoder.Decode(&m); err != nil {
 			t.Error(err)
 		}
-	} else if strings.Contains(ctype, "form") {
+	} else if strings.Contains(ctype, "multipart") {
 		if err := r.ParseMultipartForm(10 << 20); err != nil {
+			t.Error(err)
+		}
+		m = r.Form
+	} else if strings.Contains(ctype, "form") {
+		if err := r.ParseForm(); err != nil {
 			t.Error(err)
 		}
 		m = r.Form

@@ -1,9 +1,10 @@
 package easyreq
 
 import (
-	"bytes"
 	"encoding/base64"
 	"io"
+	"io/ioutil"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -97,7 +98,10 @@ func (form *Form) Request(verb, urlStr string) (*http.Request, error) {
 		return postWithoutFiles(form, verb, urlStr)
 	}
 
-	body := &bytes.Buffer{}
+	body, err := ioutil.TempFile(os.TempDir(), "easyreq-request")
+	if err != nil {
+		return nil, err
+	}
 	bodyWriter := multipart.NewWriter(body)
 
 	for key, paths := range form.files {
@@ -125,16 +129,20 @@ func (form *Form) Request(verb, urlStr string) (*http.Request, error) {
 
 	for key, values := range form.fields {
 		for _, value := range values {
-			if err := bodyWriter.WriteField(key, value); err != nil {
+			if err = bodyWriter.WriteField(key, value); err != nil {
 				return nil, err
 			}
 		}
 	}
 
-	if err := bodyWriter.Close(); err != nil {
+	if err = bodyWriter.Close(); err != nil {
 		return nil, err
 	}
-
+	if err = body.Close(); err != nil {
+		return nil, err
+	}
+	log.Println(body.Name())
+	body, err = os.Open(body.Name())
 	req, err := http.NewRequest(verb, urlStr, body)
 	if err != nil {
 		return nil, err

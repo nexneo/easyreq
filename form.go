@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"io"
 	"io/ioutil"
-	"log"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -141,13 +140,19 @@ func (form *Form) Request(verb, urlStr string) (*http.Request, error) {
 	if err = body.Close(); err != nil {
 		return nil, err
 	}
-	log.Println(body.Name())
+	// log.Println(body.Name())
 	body, err = os.Open(body.Name())
 	req, err := http.NewRequest(verb, urlStr, body)
 	if err != nil {
 		return nil, err
 	}
 	req.Header = form.Header()
+	if info, err := body.Stat(); err != nil {
+		return nil, err
+	} else {
+		req.ContentLength = info.Size()
+	}
+	// log.Println(req.ContentLength)
 	req.Header.Set("Content-Type", bodyWriter.FormDataContentType())
 
 	return req, nil

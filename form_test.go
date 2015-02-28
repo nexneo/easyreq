@@ -38,6 +38,29 @@ func TestMultipartForm(t *testing.T) {
 	}
 }
 
+func TestMailgunEmail(t *testing.T) {
+	var formEmail = os.Getenv("TEST_FROM_EMAIL")
+	var toEmail = os.Getenv("TEST_TO_EMAIL")
+	var mailApiToken = os.Getenv("MAILGUN_API_TOKEN")
+	var mailApiEndpoint = os.Getenv("MAILGUN_API_ENDPOINT")
+
+	mail := &Form{}
+	mail.Field().Add("from", formEmail)
+	mail.Field().Add("to", toEmail)
+	mail.Field().Add("subject", "Report you have requested is ready")
+	mail.Field().Add("text", "Hello, World")
+	mail.Field().Add("html", "<h1>Hello, World</h1>")
+	mail.File().Add("attachment", "README.md")
+
+	mail.SetBasicAuth("api", mailApiToken)
+
+	res, err := mail.Do("POST", mailApiEndpoint)
+	if err != nil {
+		t.Error(err)
+	}
+	res.Body.Close()
+}
+
 func TestSimpleGet(t *testing.T) {
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Query().Get("Name") != "John" {
